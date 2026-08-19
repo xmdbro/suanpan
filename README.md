@@ -2,8 +2,6 @@
 
 A stateless, highly scalable counting API written in Python.
 
----
-
 <!-- ## Quick Start
 
 ```bash
@@ -18,8 +16,6 @@ uvicorn main:app --reload
 ```
 
 Interactive docs are available at `http://localhost:8000/docs`. -->
-
----
 
 ## API Endpoints
 
@@ -58,16 +54,12 @@ A counter is **genuine** when it has no admin key -- i.e. it was auto-created by
 
 All counters have a **6-month rolling TTL** refreshed on every `/hit`. Counters expire if untouched for ~6 months. (I believe this is reasonable)
 
----
-
 ## Configuration
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `VALKEY_URL` | `valkey://localhost:6379` | Valkey connection URL |
 | `PORT` | `8000` | HTTP port (set via uvicorn CLI) |
-
----
 
 ## Roadmap
 
