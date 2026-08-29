@@ -5,7 +5,9 @@ URL scheme (verb-first, matching the reference API):
   POST /create/{namespace}/{key}   — create a new counter
   POST /create                     — create a counter with a random namespace+key
   GET  /get/{namespace}/{key}      — read current value
+  GET  /get/{namespace}/{key}/shield — read current value as SVG
   GET  /hit/{namespace}/{key}      — increment by 1
+  GET  /hit/{namespace}/{key}/shield — increment by 1 and return SVG
   POST /update/{namespace}/{key}   — increment/decrement by ?value=N  (requires token)
   POST /set/{namespace}/{key}      — overwrite with ?value=N          (requires token)
   POST /reset/{namespace}/{key}    — set back to 0                    (requires token)
@@ -16,10 +18,11 @@ URL scheme (verb-first, matching the reference API):
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Header, Query
+from fastapi import APIRouter, Depends, HTTPException, Header, Query, Response
 
 import core.database as db
 from core.constants import BASE_TTL_SECONDS, MAX_INT
+from utils.badges import BadgeOptions, generate_badge
 from utils.keys import (
     build_admin_key,
     build_db_key,
@@ -81,6 +84,62 @@ async def get_token(
     return None
 
 
+def get_badge_options(
+    bgcolor: str = Query("007ec6", description="Badge background hex color"),
+    textcolor: str = Query("fff", description="Badge text hex color"),
+    text: str = Query("counter", description="Badge label"),
+    style: str = Query(
+        "flat",
+        description=(
+            "flat, flat-square, plastic, flat-simple, "
+            "flat-square-simple, or plastic-simple"
+        ),
+    ),
+    fontsize: str = Query("11", description="Font size; values <= 3 use 11"),
+    font: str = Query("verdana", description="Supported font family name"),
+) -> BadgeOptions:
+    """Collect Abacus-compatible shield query parameters."""
+    return BadgeOptions(bgcolor, textcolor, text, style, fontsize, font)
+
+
+def _shield_response(value: int, options: BadgeOptions, *, no_cache: bool) -> Response:
+    try:
+        svg = generate_badge(value, options)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+
+    headers = {}
+    if no_cache:
+        headers["Cache-Control"] = "max-age=0, no-cache, no-store, must-revalidate"
+    return Response(content=svg, media_type="image/svg+xml", headers=headers)
+
+
+async def _get_counter_value(namespace: str, key: str) -> int:
+    namespace, key = parse_namespace_key(namespace, key)
+    db_key = build_db_key(namespace, key)
+
+    val = await db.client.get(db_key)
+    if val is None:
+        raise HTTPException(status_code=404, detail="Key not found")
+    return int(val)
+
+
+async def _hit_counter_value(namespace: str, key: str) -> int:
+    namespace, key = parse_namespace_key(namespace, key)
+    db_key = build_db_key(namespace, key)
+
+    val = await db.client.incr(db_key)
+    if val > MAX_INT:
+        await db.client.decr(db_key)
+        raise HTTPException(
+            status_code=400,
+            detail=f"Value is too large. Max value is {MAX_INT}",
+        )
+
+    await db.client.expire(db_key, BASE_TTL_SECONDS)
+    return val
+
+
 # ── /create ───────────────────────────────────────────────────────────────────
 
 @router.post("/create/{namespace}/{key}", status_code=201, tags=["counters"])
@@ -135,14 +194,18 @@ async def create_random():
 @router.get("/get/{namespace}/{key}", tags=["counters"])
 async def get(namespace: str, key: str):
     """Return the current value of a counter."""
-    namespace, key = parse_namespace_key(namespace, key)
-    db_key = build_db_key(namespace, key)
+    return {"value": await _get_counter_value(namespace, key)}
 
-    val = await db.client.get(db_key)
-    if val is None:
-        raise HTTPException(status_code=404, detail="Key not found")
 
-    return {"value": int(val)}
+@router.get("/get/{namespace}/{key}/shield", tags=["counters"])
+async def get_shield(
+    namespace: str,
+    key: str,
+    options: BadgeOptions = Depends(get_badge_options),
+):
+    """Return the current counter value as an SVG shield."""
+    value = await _get_counter_value(namespace, key)
+    return _shield_response(value, options, no_cache=False)
 
 
 # ── /hit ──────────────────────────────────────────────────────────────────────
@@ -150,23 +213,18 @@ async def get(namespace: str, key: str):
 @router.get("/hit/{namespace}/{key}", tags=["counters"])
 async def hit(namespace: str, key: str):
     """Increment the counter by 1 and return the new value."""
-    namespace, key = parse_namespace_key(namespace, key)
-    db_key = build_db_key(namespace, key)
+    return {"value": await _hit_counter_value(namespace, key)}
 
-    val = await db.client.incr(db_key)
 
-    if val > MAX_INT:
-        # Roll back and refuse — the counter is at its ceiling.
-        await db.client.decr(db_key)
-        raise HTTPException(
-            status_code=400,
-            detail=f"Value is too large. Max value is {MAX_INT}",
-        )
-
-    # Lazily set/refresh TTL — the key may have been auto-created by INCR.
-    await db.client.expire(db_key, BASE_TTL_SECONDS)
-
-    return {"value": val}
+@router.get("/hit/{namespace}/{key}/shield", tags=["counters"])
+async def hit_shield(
+    namespace: str,
+    key: str,
+    options: BadgeOptions = Depends(get_badge_options),
+):
+    """Increment the counter and return its new value as an SVG shield."""
+    value = await _hit_counter_value(namespace, key)
+    return _shield_response(value, options, no_cache=True)
 
 
 # ── /update ───────────────────────────────────────────────────────────────────
