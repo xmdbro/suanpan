@@ -1,4 +1,5 @@
 import unittest
+import xml.etree.ElementTree as ElementTree
 
 from fastapi.testclient import TestClient
 
@@ -26,6 +27,11 @@ class CounterApiTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 201)
         return response.json()
+
+    def parse_svg(self, content: bytes) -> ElementTree.Element:
+        root = ElementTree.fromstring(content)
+        self.assertEqual(root.tag, "{http://www.w3.org/2000/svg}svg")
+        return root
 
     def test_create_get_hit_and_info(self) -> None:
         created = self.create_counter(initializer=10)
@@ -110,6 +116,120 @@ class CounterApiTests(unittest.TestCase):
         fetched = self.client.get(f"/get/{body['namespace']}/{body['key']}")
         self.assertEqual(fetched.status_code, 200)
         self.assertEqual(fetched.json(), {"value": 0})
+
+    def test_get_shield_returns_current_value_as_svg(self) -> None:
+        self.create_counter(initializer=50)
+
+        response = self.client.get("/get/test/counter/shield")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["content-type"], "image/svg+xml")
+        self.assertNotIn("cache-control", response.headers)
+        root = self.parse_svg(response.content)
+        text_values = [element.text for element in root.iter() if element.tag.endswith("text")]
+        self.assertEqual(text_values[-1], "50")
+        self.assertEqual(root.attrib["aria-label"], "counter: 50")
+
+    def test_hit_shield_increments_once_and_disables_caching(self) -> None:
+        self.create_counter(initializer=6)
+
+        response = self.client.get("/hit/test/counter/shield")
+
+        self.assertEqual(response.status_code, 200)
+        self.parse_svg(response.content)
+        self.assertEqual(
+            response.headers["cache-control"],
+            "max-age=0, no-cache, no-store, must-revalidate",
+        )
+        self.assertIn(">7</text>", response.text)
+        self.assertEqual(self.client.get("/get/test/counter").json(), {"value": 7})
+
+    def test_get_shield_returns_not_found_for_missing_counter(self) -> None:
+        response = self.client.get("/get/test/missing/shield")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {"detail": "Key not found"})
+
+    def test_shield_supports_all_abacus_styles(self) -> None:
+        self.create_counter(initializer=3)
+        styles = (
+            "flat",
+            "flat-square",
+            "plastic",
+            "flat-simple",
+            "flat-square-simple",
+            "plastic-simple",
+        )
+
+        for style in styles:
+            with self.subTest(style=style):
+                response = self.client.get(
+                    "/get/test/counter/shield", params={"style": style}
+                )
+                self.assertEqual(response.status_code, 200)
+                root = self.parse_svg(response.content)
+                self.assertEqual(root.attrib["aria-label"], "3" if style.endswith("-simple") else "counter: 3")
+
+    def test_shield_supports_abacus_customization_options(self) -> None:
+        self.create_counter(initializer=12)
+
+        response = self.client.get(
+            "/get/test/counter/shield",
+            params={
+                "bgcolor": "e05d44",
+                "textcolor": "ffff00",
+                "text": "visits & clicks",
+                "style": "plastic",
+                "fontsize": "12",
+                "font": "arial",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        root = self.parse_svg(response.content)
+        self.assertEqual(root.attrib["aria-label"], "visits & clicks: 12")
+        self.assertIn('fill="#e05d44"', response.text)
+        self.assertIn('fill="#ffff00"', response.text)
+        self.assertIn('font-family="Arial,Helvetica,sans-serif"', response.text)
+        self.assertIn('font-size="12"', response.text)
+        self.assertIn("visits &amp; clicks", response.text)
+
+    def test_simple_shield_omits_label(self) -> None:
+        self.create_counter(initializer=8)
+        response = self.client.get(
+            "/get/test/counter/shield",
+            params={"style": "flat-simple", "text": "do not render"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("do not render", response.text)
+        self.assertEqual(self.parse_svg(response.content).attrib["aria-label"], "8")
+
+    def test_shield_rejects_invalid_hex_colors(self) -> None:
+        self.create_counter()
+
+        background = self.client.get(
+            "/get/test/counter/shield", params={"bgcolor": "purple"}
+        )
+        foreground = self.client.get(
+            "/get/test/counter/shield", params={"textcolor": "12"}
+        )
+
+        self.assertEqual(background.status_code, 400)
+        self.assertIn("not a valid hex color", background.json()["detail"])
+        self.assertEqual(foreground.status_code, 400)
+
+    def test_invalid_shield_style_font_and_size_use_abacus_fallbacks(self) -> None:
+        self.create_counter(initializer=2)
+        response = self.client.get(
+            "/get/test/counter/shield",
+            params={"style": "unknown", "font": "unknown", "fontsize": "tiny"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.parse_svg(response.content)
+        self.assertIn('font-family="Verdana,DejaVu Sans,sans-serif"', response.text)
+        self.assertIn('font-size="11"', response.text)
+        self.assertIn('id="smooth"', response.text)
 
 
 if __name__ == "__main__":
