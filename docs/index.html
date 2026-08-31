@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Suanpan is a small, fast counting API for page views, events, badges, and everything in between." />
+    <meta name="theme-color" content="#f7f5f0" />
+    <meta property="og:title" content="Suanpan — Counting, without the ceremony." />
+    <meta property="og:description" content="A small, fast counting API for page views, events, badges, and everything in between." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://raw.githubusercontent.com/xmdbro/suanpan/main/docs/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Suanpan — Counting, without the ceremony." />
+    <meta name="twitter:description" content="A small, fast counting API for page views, events, badges, and everything in between." />
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/xmdbro/suanpan/main/docs/og.png" />
+    <title>Suanpan Docs — Counting without the ceremony</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Suanpan documentation home">
+        <span class="brand-mark" aria-hidden="true">算</span>
+        <span class="brand-name">suanpan</span>
+        <span class="brand-tag">docs</span>
+      </a>
+      <div class="topbar-actions">
+        <button class="search-trigger" type="button" aria-label="Search documentation">
+          <span aria-hidden="true">⌕</span> Search docs <kbd>Ctrl K</kbd>
+        </button>
+        <a class="status-link" href="#health">
+          <span class="status-dot" aria-hidden="true"></span>
+          API reference
+        </a>
+        <a class="github-link" href="https://github.com/xmdbro/suanpan">GitHub <span aria-hidden="true">↗</span></a>
+        <button class="theme-toggle" type="button" aria-label="Switch to dark theme"><span aria-hidden="true">◐</span></button>
+        <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span></button>
+      </div>
+    </header>
+
+    <div class="docs-shell" id="top">
+      <aside class="sidebar" aria-label="Documentation navigation">
+        <nav>
+          <p class="nav-label">Start here</p>
+          <a class="nav-link active" href="#overview">Overview</a>
+          <a class="nav-link" href="#quickstart">Quickstart</a>
+          <a class="nav-link" href="#concepts">Core concepts</a>
+
+          <p class="nav-label">API reference</p>
+          <a class="nav-link" href="#hit"><span class="nav-method get">GET</span> Hit a counter</a>
+          <a class="nav-link" href="#read"><span class="nav-method get">GET</span> Read a counter</a>
+          <a class="nav-link" href="#create"><span class="nav-method post">POST</span> Create a counter</a>
+          <a class="nav-link" href="#manage"><span class="nav-method post">POST</span> Manage a counter</a>
+          <a class="nav-link" href="#shields"><span class="nav-method get">GET</span> SVG shields</a>
+          <a class="nav-link" href="#utility"><span class="nav-method get">GET</span> Utility routes</a>
+
+          <p class="nav-label">Resources</p>
+          <a class="nav-link" href="#errors">Errors</a>
+          <a class="nav-link" href="#limits">Limits &amp; expiry</a>
+        </nav>
+        <div class="sidebar-foot">
+          <p>Open source under MIT.</p>
+          <a href="https://github.com/xmdbro/suanpan/issues">Report an issue <span aria-hidden="true">↗</span></a>
+        </div>
+      </aside>
+
+      <main id="content" class="content">
+        <section class="hero" id="overview">
+          <div class="eyebrow"><span class="eyebrow-pip"></span> Stateless counting API</div>
+          <h1>Counting, without<br />the ceremony.</h1>
+          <p class="hero-copy">Suanpan gives every <code>namespace/key</code> pair a durable integer. Hit it, read it, badge it, or manage it—over a tiny HTTP API.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#quickstart">Make your first count <span aria-hidden="true">↓</span></a>
+            <a class="button secondary" href="https://github.com/xmdbro/suanpan">View source <span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="hero-facts" aria-label="Suanpan features">
+            <div><strong>Zero</strong><span>client dependencies</span></div>
+            <div><strong>6 months</strong><span>rolling expiry</span></div>
+            <div><strong>SVG</strong><span>badges built in</span></div>
+          </div>
+        </section>
+
+        <section class="section" id="quickstart">
+          <div class="section-kicker">01 / Quickstart</div>
+          <h2>One request is all it takes.</h2>
+          <p class="lede">A hit creates the counter when it does not exist, increments it by one, and returns the new value.</p>
+
+          <div class="code-window">
+            <div class="code-titlebar">
+              <div class="window-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+              <div class="code-tabs" role="tablist" aria-label="Quickstart language">
+                <button class="code-tab active" type="button" role="tab" aria-selected="true" data-language="curl">cURL</button>
+                <button class="code-tab" type="button" role="tab" aria-selected="false" data-language="javascript">JS</button>
+                <button class="code-tab" type="button" role="tab" aria-selected="false" data-language="python">Python</button>
+              </div>
+              <button class="copy-button" type="button">Copy</button>
+            </div>
+            <pre class="quickstart-code"><code><span class="prompt">$</span> curl https://suanpan.example.com/hit/acme.dev/homepage
+
+<span class="comment"># 200 OK</span>
+<span class="json">{ "value": 1 }</span></code></pre>
+          </div>
+
+          <div class="callout note">
+            <span class="callout-icon" aria-hidden="true">i</span>
+            <div><strong>Choose a stable namespace.</strong> Your domain is a good default—something like <code>acme.dev</code>. Keys name the thing you are counting, such as <code>homepage</code> or <code>signup-clicks</code>.</div>
+          </div>
+        </section>
+
+        <section class="section" id="concepts">
+          <div class="section-kicker">02 / Core concepts</div>
+          <h2>Small surface. Clear rules.</h2>
+          <div class="concept-grid">
+            <article>
+              <span class="concept-number">01</span>
+              <h3>Namespace + key</h3>
+              <p>Every counter lives at one pair. Both parts are 3–64 characters and may contain letters, numbers, <code>_</code>, <code>-</code>, or <code>.</code>.</p>
+            </article>
+            <article>
+              <span class="concept-number">02</span>
+              <h3>Genuine counters</h3>
+              <p>Counters born from a <code>/hit</code> are genuine: simple, unmanaged, and intentionally without an admin key.</p>
+            </article>
+            <article>
+              <span class="concept-number">03</span>
+              <h3>Managed counters</h3>
+              <p>Create a counter explicitly to receive an admin key. That key unlocks update, set, reset, and delete operations.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section api-section" id="hit">
+          <div class="section-kicker">03 / API reference</div>
+          <h2>Hit a counter</h2>
+          <p class="lede">Increment by one. If the counter does not exist yet, Suanpan creates a genuine counter and returns <code>1</code>.</p>
+
+          <article class="endpoint">
+            <div class="endpoint-heading">
+              <span class="method get">GET</span>
+              <code>/hit/{namespace}/{key}</code>
+              <button class="copy-path" type="button" aria-label="Copy endpoint path">Copy</button>
+            </div>
+            <div class="endpoint-body">
+              <div class="parameter-list">
+                <div><code>namespace</code><span>path · string · required</span><p>A stable bucket for related counters.</p></div>
+                <div><code>key</code><span>path · string · required</span><p>The specific event or value you are counting.</p></div>
+              </div>
+              <div class="response-example">
+                <div class="response-label"><span>Response</span><strong>200</strong></div>
+                <pre><code>{
+  <span class="json-key">"value"</span>: <span class="json-number">42</span>
+}</code></pre>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="section api-section" id="read">
+          <div class="section-kicker">04 / Read</div>
+          <h2>Read a counter</h2>
+          <p class="lede">Fetch the current value without changing it, or request metadata when you need more context.</p>
+
+          <article class="endpoint compact">
+            <div class="endpoint-heading">
+              <span class="method get">GET</span>
+              <code>/get/{namespace}/{key}</code>
+              <button class="copy-path" type="button" aria-label="Copy endpoint path">Copy</button>
+            </div>
+            <p>Returns <code>{ "value": 42 }</code>, or <code>404</code> when the key is not found.</p>
+          </article>
+
+          <article class="endpoint compact">
+            <div class="endpoint-heading">
+              <span class="method get">GET</span>
+              <code>/info/{namespace}/{key}</code>
+              <button class="copy-path" type="button" aria-label="Copy endpoint path">Copy</button>
+            </div>
+            <p>Returns the value, internal key, remaining TTL, existence state, and whether the counter is genuine.</p>
+            <div class="inline-response"><code>{ "value": 42, "full_key": "K:acme.dev:homepage", "is_genuine": true, "expires_in": 14515199, "exists": true }</code></div>
+          </article>
+        </section>
+
+        <section class="section api-section" id="create">
+          <div class="section-kicker">05 / Create</div>
+          <h2>Create a managed counter</h2>
+          <p class="lede">Use <code>/create</code> when you need to change, reset, or delete a counter later. The response includes its admin key.</p>
+
+          <article class="endpoint">
+            <div class="endpoint-heading">
+              <span class="method post">POST</span>
+              <code>/create/{namespace}/{key}</code>
+              <button class="copy-path" type="button" aria-label="Copy endpoint path">Copy</button>
+            </div>
+            <div class="endpoint-body">
+              <div class="parameter-list">
+                <div><code>initializer</code><span>query · integer · optional</span><p>Starting value. Defaults to <code>0</code>.</p></div>
+                <div><code>admin_token</code><span>query · string · optional</span><p>Supply your own token or let Suanpan generate one.</p></div>
+              </div>
+              <div class="response-example">
+                <div class="response-label"><span>Response</span><strong>201</strong></div>
+                <pre><code>{
+  <span class="json-key">"namespace"</span>: <span class="json-string">"acme.dev"</span>,
+  <span class="json-key">"key"</span>: <span class="json-string">"signups"</span>,
+  <span class="json-key">"value"</span>: <span class="json-number">0</span>,
+  <span class="json-key">"admin_key"</span>: <span class="json-string">"••••••••"</span>
+}</code></pre>
+              </div>
+            </div>
+          </article>
+
+          <div class="callout warning">
+            <span class="callout-icon" aria-hidden="true">!</span>
+            <div><strong>Store the admin key when it is returned.</strong> It is the credential for privileged operations and should never be committed to client-side code or a public repository.</div>
+          </div>
+
+          <article class="endpoint compact">
+            <div class="endpoint-heading">
+              <span class="method post">POST</span>
+              <code>/create</code>
+              <button class="copy-path" type="button" aria-label="Copy endpoint path">Copy</button>
+            </div>
+            <p>Creates a managed counter with a random 16-character namespace and key. Useful when you do not need human-readable URLs.</p>
+          </article>
+        </section>
+
+        <section class="section api-section" id="manage">
+          <div class="section-kicker">06 / Manage</div>
+          <h2>Change a managed counter</h2>
+          <p class="lede">Send the admin key as <code>Authorization: Bearer &lt;key&gt;</code> or with the <code>?token=</code> query parameter.</p>
+
+          <div class="route-table" role="table" aria-label="Managed counter routes">
+            <div class="route-row route-head" role="row"><span>Method</span><span>Path</span><span>Effect</span></div>
+            <div class="route-row" role="row"><span class="method post">POST</span><code>/update/{namespace}/{key}?value=N</code><p>Add or subtract an integer.</p></div>
+            <div class="route-row" role="row"><span class="method post">POST</span><code>/set/{namespace}/{key}?value=N</code><p>Replace the current value.</p></div>
+            <div class="route-row" role="row"><span class="method post">POST</span><code>/reset/{namespace}/{key}</code><p>Return the value to zero.</p></div>
+            <div class="route-row" role="row"><span class="method post">POST</span><code>/delete/{namespace}/{key}</code><p>Delete the counter permanently.</p></div>
+          </div>
+
+          <div class="code-window small">
+            <div class="code-titlebar"><div class="window-dots" aria-hidden="true"><i></i><i></i><i></i></div><span>Update by five</span><button class="copy-button" type="button">Copy</button></div>
+            <pre><code><span class="prompt">$</span> curl -X POST \
+  -H <span class="json-string">"Authorization: Bearer $SUANPAN_ADMIN_KEY"</span> \
+  <span class="json-string">"https://suanpan.example.com/update/acme.dev/signups?value=5"</span></code></pre>
+          </div>
+        </section>
+
+        <section class="section api-section" id="shields">
+          <div class="section-kicker">07 / SVG shields</div>
+          <h2>Turn any counter into a badge.</h2>
+          <p class="lede">Append <code>/shield</code> to either read or hit endpoint. The hit variant disables caching so each image request is counted.</p>
+
+          <div class="shield-builder">
+            <div class="shield-preview-panel">
+              <p class="mini-label">Preview</p>
+              <div class="badge-preview" aria-label="Preview badge"><span>visits</span><strong>1,284</strong></div>
+              <code class="shield-url">/get/acme.dev/homepage/shield?text=visits&amp;bgcolor=d9533f</code>
+            </div>
+            <form class="shield-controls" aria-label="Shield preview controls">
+              <label>Label<input id="shield-label" type="text" value="visits" maxlength="24" /></label>
+              <label>Background<span class="color-field"><input id="shield-color" type="color" value="#d9533f" /><input id="shield-hex" type="text" value="d9533f" maxlength="6" /></span></label>
+              <label>Style<select id="shield-style"><option value="flat">Flat</option><option value="flat-square">Flat square</option><option value="plastic">Plastic</option><option value="flat-simple">Flat simple</option></select></label>
+            </form>
+          </div>
+
+          <div class="parameter-chips" aria-label="Shield query parameters">
+            <span><code>bgcolor</code> background hex</span>
+            <span><code>textcolor</code> text hex</span>
+            <span><code>text</code> left label</span>
+            <span><code>style</code> badge shape</span>
+            <span><code>fontsize</code> size &gt; 3</span>
+            <span><code>font</code> font family</span>
+          </div>
+        </section>
+
+        <section class="section api-section" id="utility">
+          <div class="section-kicker">08 / Utility routes</div>
+          <h2>Service information</h2>
+          <div class="utility-grid">
+            <article id="health"><div><span class="method get">GET</span><code>/healthcheck</code></div><p>Checks API and Valkey connectivity. <code>/health</code> is an alias.</p></article>
+            <article><div><span class="method get">GET</span><code>/stats</code></div><p>Returns key count, Valkey version, expired keys, and processed commands.</p></article>
+          </div>
+        </section>
+
+        <section class="section api-section" id="errors">
+          <div class="section-kicker">09 / Errors</div>
+          <h2>Predictable status codes</h2>
+          <div class="status-list">
+            <div><strong>400</strong><span>Bad request</span><p>Invalid key format, value, shield option, or an admin action on a genuine counter.</p></div>
+            <div><strong>401</strong><span>Unauthorized</span><p>The supplied admin key does not match.</p></div>
+            <div><strong>404</strong><span>Not found</span><p>The route or requested counter does not exist.</p></div>
+            <div><strong>409</strong><span>Conflict</span><p>A counter already exists, or a managed operation cannot be completed.</p></div>
+          </div>
+        </section>
+
+        <section class="section limits-section" id="limits">
+          <div class="section-kicker">10 / Limits &amp; expiry</div>
+          <h2>Designed to stay small.</h2>
+          <div class="limit-grid">
+            <div><span>Key format</span><strong>3–64</strong><p>characters per segment</p></div>
+            <div><span>Expiry</span><strong>~6mo</strong><p>rolling TTL after every hit</p></div>
+            <div><span>Storage</span><strong>int</strong><p>up to the platform safe maximum</p></div>
+          </div>
+          <p class="closing-copy">A counter expires after roughly six months without a hit. Reading it does not refresh the TTL; hitting it does.</p>
+        </section>
+
+        <footer class="site-footer">
+          <div><span class="brand-mark" aria-hidden="true">算</span><p><strong>Suanpan</strong><br />A stateless counting API.</p></div>
+          <div><a href="#top">Back to top ↑</a><a href="https://github.com/xmdbro/suanpan">GitHub ↗</a><a href="https://github.com/xmdbro/suanpan/issues">Issues ↗</a></div>
+        </footer>
+      </main>
+
+      <aside class="toc" aria-label="On this page">
+        <p class="toc-label">On this page</p>
+        <a class="active" href="#overview">Overview</a>
+        <a href="#quickstart">Quickstart</a>
+        <a href="#concepts">Core concepts</a>
+        <a href="#hit">Hit a counter</a>
+        <a href="#read">Read a counter</a>
+        <a href="#create">Create</a>
+        <a href="#manage">Manage</a>
+        <a href="#shields">SVG shields</a>
+        <a href="#errors">Errors</a>
+      </aside>
+    </div>
+
+    <dialog class="search-dialog" aria-labelledby="search-title">
+      <div class="search-box">
+        <label id="search-title" for="docs-search">Search documentation</label>
+        <input id="docs-search" type="search" placeholder="Try “create”, “shield”, or “expiry”…" autocomplete="off" />
+        <button class="search-close" type="button" aria-label="Close search">Esc</button>
+      </div>
+      <div class="search-results" aria-live="polite"></div>
+    </dialog>
+    <div class="mobile-backdrop" hidden></div>
+    <script src="./site-config.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>
