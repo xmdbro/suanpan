@@ -1,0 +1,102 @@
+name: Test and deploy
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Validate Compose file
+        run: docker compose config --quiet
+
+      - name: Build production image
+        run: docker build --tag suanpan:test .
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: test
+    runs-on: ubuntu-latest
+    concurrency:
+      group: suanpan-production
+      cancel-in-progress: false
+    env:
+      DEPLOY_ROOT: /opt/suanpan
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_PORT: ${{ vars.VPS_SSH_PORT || '22' }}
+      VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+      VPS_SSH_KNOWN_HOSTS: ${{ secrets.VPS_SSH_KNOWN_HOSTS }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          test -n "$VPS_HOST"
+          test -n "$VPS_USER"
+          test -n "$VPS_SSH_PRIVATE_KEY"
+          test -n "$VPS_SSH_KNOWN_HOSTS"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$VPS_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Package release
+        shell: bash
+        run: |
+          tar \
+            --exclude=.git \
+            --exclude=.venv \
+            --exclude='.env*' \
+            --exclude='__pycache__' \
+            --exclude='*/__pycache__' \
+            --exclude='*.pyc' \
+            -czf "/tmp/suanpan-${GITHUB_SHA}.tar.gz" .
+
+      - name: Upload release
+        shell: bash
+        run: |
+          scp \
+            -P "$VPS_SSH_PORT" \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            "/tmp/suanpan-${GITHUB_SHA}.tar.gz" \
+            "$VPS_USER@$VPS_HOST:/tmp/suanpan-${GITHUB_SHA}.tar.gz"
+
+      - name: Deploy and verify
+        shell: bash
+        run: |
+          ssh \
+            -p "$VPS_SSH_PORT" \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            "$VPS_USER@$VPS_HOST" \
+            "bash -s -- '$DEPLOY_ROOT' '$GITHUB_SHA' '/tmp/suanpan-${GITHUB_SHA}.tar.gz'" \
+            < .github/scripts/remote-deploy.sh

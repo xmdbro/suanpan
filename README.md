@@ -2,6 +2,17 @@
 
 A stateless, highly scalable counting API written in Python.
 
+## Run with Docker
+
+```bash
+docker compose up -d --build
+curl http://127.0.0.1:8000/healthcheck
+```
+
+This starts Suanpan and Valkey as separate containers. Valkey data is persisted
+in the `suanpan_valkey_data` named volume. For production deployment, HTTPS,
+GitHub Actions, SSH secrets, and VPS setup, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
 <!-- ## Quick Start
 
 ```bash
@@ -98,7 +109,7 @@ python -m unittest discover -s tests -v
 - [ ] Rate limiting (slowapi + Valkey backend)
 - [ ] In-process GET micro-cache + TTL coalescing
 - [ ] Prometheus metrics
-- [ ] Docker + CI/CD + Deployment
+- [x] Docker + CI/CD + Deployment
 - [ ] Traffic trends (/history/{namespace}/{key}?range=7d&granularity=1d)
 - [ ] Webhooks, potentially for milestone triggers (maybe)
 - [ ] Namespace-wide hit & get (/batch/hit & /batch/get)
