@@ -1,4 +1,4 @@
-// Change this once to update every API example in the documentation.
+// Keep every API example pointed at the origin serving the documentation.
 window.SUANPAN_DOCS = {
-  apiBaseUrl: "https://suanpan.lancechiu.com",
+  apiBaseUrl: window.location.origin,
 };

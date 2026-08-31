@@ -18,6 +18,7 @@ COPY --chown=suanpan:suanpan main.py ./
 COPY --chown=suanpan:suanpan core ./core
 COPY --chown=suanpan:suanpan routes ./routes
 COPY --chown=suanpan:suanpan utils ./utils
+COPY --chown=suanpan:suanpan docs ./docs
 
 USER suanpan
 

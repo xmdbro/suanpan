@@ -33,6 +33,36 @@ class CounterApiTests(unittest.TestCase):
         self.assertEqual(root.tag, "{http://www.w3.org/2000/svg}svg")
         return root
 
+    def test_frontend_and_api_documentation_routes(self) -> None:
+        homepage = self.client.get("/")
+        self.assertEqual(homepage.status_code, 200)
+        self.assertIn("text/html", homepage.headers["content-type"])
+        self.assertIn("Counting, without", homepage.text)
+        self.assertEqual(homepage.headers["x-content-type-options"], "nosniff")
+
+        stylesheet = self.client.get("/styles.css")
+        self.assertEqual(stylesheet.status_code, 200)
+        self.assertIn("text/css", stylesheet.headers["content-type"])
+        self.assertEqual(
+            stylesheet.headers["cache-control"],
+            "public, max-age=3600, stale-while-revalidate=86400",
+        )
+
+        swagger = self.client.get("/docs")
+        self.assertEqual(swagger.status_code, 200)
+        self.assertIn("Swagger UI", swagger.text)
+
+        schema = self.client.get("/openapi.json")
+        self.assertEqual(schema.status_code, 200)
+        self.assertIn("/hit/{namespace}/{key}", schema.json()["paths"])
+
+        missing = self.client.get(
+            "/not-a-real-page",
+            headers={"Accept": "text/html"},
+        )
+        self.assertEqual(missing.status_code, 404)
+        self.assertIn("This count came up empty", missing.text)
+
     def test_create_get_hit_and_info(self) -> None:
         created = self.create_counter(initializer=10)
 
