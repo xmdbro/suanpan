@@ -98,5 +98,10 @@ python -m unittest discover -s tests -v
 - [ ] Rate limiting (slowapi + Valkey backend)
 - [ ] In-process GET micro-cache + TTL coalescing
 - [ ] Prometheus metrics
-- [ ] Docker + Fly.io deployment
+- [ ] Docker + CI/CD + Deployment
+- [ ] Traffic trends (/history/{namespace}/{key}?range=7d&granularity=1d)
+- [ ] Webhooks, potentially for milestone triggers (maybe)
+- [ ] Namespace-wide hit & get (/batch/hit & /batch/get)
+- [ ] Aggregation (/get/{namespace})
+- [ ] Unique visitor counting using HLL (no change to counting behaviour)
 - [x] Test suite
