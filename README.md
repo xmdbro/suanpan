@@ -2,17 +2,6 @@
 
 A stateless, highly scalable counting API written in Python.
 
-## Run with Docker
-
-```bash
-docker compose up -d --build
-curl http://127.0.0.1:8000/healthcheck
-```
-
-This starts Suanpan and Valkey as separate containers. Valkey data is persisted
-in the `suanpan_valkey_data` named volume. For production deployment, HTTPS,
-GitHub Actions, SSH secrets, and VPS setup, see [DEPLOYMENT.md](DEPLOYMENT.md).
-
 <!-- ## Quick Start
 
 ```bash
