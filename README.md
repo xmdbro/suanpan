@@ -2,6 +2,9 @@
 
 A stateless, highly scalable counting API written in Python.
 
+The front-facing documentation site is served at `/`. Interactive Swagger API
+documentation remains available at `/docs`.
+
 <!-- ## Quick Start
 
 ```bash

@@ -1,17 +1,24 @@
 # Suanpan documentation site
 
-This directory is a dependency-free static site. It can be previewed with any static file server and or deployed pretty simply.
+This directory is a dependency-free static frontend served by the main FastAPI
+application. The site is available at `/`, while FastAPI's interactive Swagger
+documentation remains available at `/docs`.
 
-## Set the API URL
+The examples use `window.location.origin`, so they automatically target the
+same API in local development and production.
 
-Edit `site-config.js` and replace `https://suanpan.example.com` with the production API origin. Every runnable example updates from that one value.
+## Preview the complete application
 
-## Preview locally
-
-From the repository root:
+Start the API from the repository root with its normal development command:
 
 ```bash
-python -m http.server 4173 --directory docs
+uvicorn main:app --reload
 ```
 
-Then open `http://localhost:4173`.
+Then open:
+
+- Site: `http://localhost:8000/`
+- Swagger UI: `http://localhost:8000/docs`
+
+The production Docker image copies this directory into `/app/docs`. No separate
+static-site deployment or Vercel project is required.
