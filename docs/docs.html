@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f5f0" />
+    <meta
+      name="description"
+      content="Suanpan documentation: quick starts, routes, managed counters, and shields."
+    />
+    <title>Documentation — Suanpan</title>
+    <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css?v=2" />
+  </head>
+  <body class="docs-page">
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="/" aria-label="Suanpan home">
+          <span class="brand-mark" aria-hidden="true">算</span>
+          <span class="brand-name">suanpan</span>
+          <span class="brand-tag">docs</span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+          <a href="/">Home</a>
+          <a class="is-active" href="/docs">Docs</a>
+          <a href="/docs-swagger">Swagger</a>
+          <a href="https://github.com/xmdbro/suanpan">GitHub <span aria-hidden="true">↗</span></a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="docs-main shell">
+      <section class="docs-hero" aria-labelledby="docs-title">
+        <div>
+          <p class="eyebrow">Documentation · 文档</p>
+          <h1 id="docs-title">The manual is taking shape.</h1>
+        </div>
+        <div>
+          <p class="docs-intro">
+            Suanpan is usable today; the long-form guides are still being written. Until then, this page holds the essentials and Swagger remains the complete API reference.
+          </p>
+          <div class="docs-actions">
+            <a class="button button-primary" href="/docs-swagger">Open Swagger <span aria-hidden="true">↗</span></a>
+            <a class="button button-secondary" href="/">Try the demo</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="docs-section" aria-labelledby="start-title">
+        <div class="docs-section-heading">
+          <p class="eyebrow">Start here</p>
+          <h2 id="start-title">Enough to make the first request.</h2>
+          <p>Use a namespace to group counters and a key to identify one event.</p>
+        </div>
+
+        <div class="docs-stack">
+          <article class="docs-card">
+            <div class="docs-card-topline">
+              <h3>Increment a counter</h3>
+              <span class="badge">Available</span>
+            </div>
+            <p>The first hit creates the public counter. Later hits increment it by one.</p>
+            <code>GET /hit/{namespace}/{key}</code>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-topline">
+              <h3>Read its value</h3>
+              <span class="badge">Available</span>
+            </div>
+            <p>Read the current value without changing the counter.</p>
+            <code>GET /get/{namespace}/{key}</code>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-topline">
+              <h3>Guides and examples</h3>
+              <span class="badge">In progress</span>
+            </div>
+            <p>Managed counters, administration, shield styles, lifecycle behavior, and copy-paste examples will land here as the API settles.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <p><span class="footer-brand-mark" aria-hidden="true">算</span> Suanpan documentation.</p>
+        <p><a class="text-link" href="/docs-swagger">View the live API schema ↗</a></p>
+      </div>
+    </footer>
+  </body>
+</html>

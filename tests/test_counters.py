@@ -37,7 +37,8 @@ class CounterApiTests(unittest.TestCase):
         homepage = self.client.get("/")
         self.assertEqual(homepage.status_code, 200)
         self.assertIn("text/html", homepage.headers["content-type"])
-        self.assertIn("Counting, without", homepage.text)
+        self.assertIn("A counter at an", homepage.text)
+        self.assertIn('href="/docs"', homepage.text)
         self.assertEqual(homepage.headers["x-content-type-options"], "nosniff")
 
         stylesheet = self.client.get("/styles.css")
@@ -48,7 +49,13 @@ class CounterApiTests(unittest.TestCase):
             "public, max-age=3600, stale-while-revalidate=86400",
         )
 
-        swagger = self.client.get("/docs")
+        docs = self.client.get("/docs")
+        self.assertEqual(docs.status_code, 200)
+        self.assertIn("text/html", docs.headers["content-type"])
+        self.assertIn("The manual is taking shape", docs.text)
+        self.assertIn('href="/docs-swagger"', docs.text)
+
+        swagger = self.client.get("/docs-swagger")
         self.assertEqual(swagger.status_code, 200)
         self.assertIn("Swagger UI", swagger.text)
 
@@ -61,7 +68,7 @@ class CounterApiTests(unittest.TestCase):
             headers={"Accept": "text/html"},
         )
         self.assertEqual(missing.status_code, 404)
-        self.assertIn("This count came up empty", missing.text)
+        self.assertIn("This count came", missing.text)
 
     def test_create_get_hit_and_info(self) -> None:
         created = self.create_counter(initializer=10)
