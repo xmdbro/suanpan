@@ -37,7 +37,8 @@ class CounterApiTests(unittest.TestCase):
         homepage = self.client.get("/")
         self.assertEqual(homepage.status_code, 200)
         self.assertIn("text/html", homepage.headers["content-type"])
-        self.assertIn("A counter at an", homepage.text)
+        self.assertIn("Counting made effortless. And free.", homepage.text)
+        self.assertIn("<title>Home</title>", homepage.text)
         self.assertIn('href="/docs"', homepage.text)
         self.assertEqual(homepage.headers["x-content-type-options"], "nosniff")
 
@@ -52,7 +53,8 @@ class CounterApiTests(unittest.TestCase):
         docs = self.client.get("/docs")
         self.assertEqual(docs.status_code, 200)
         self.assertIn("text/html", docs.headers["content-type"])
-        self.assertIn("The manual is taking shape", docs.text)
+        self.assertIn("<title>Documentation</title>", docs.text)
+        self.assertIn("Start counting in one request", docs.text)
         self.assertIn('href="/docs-swagger"', docs.text)
 
         swagger = self.client.get("/docs-swagger")

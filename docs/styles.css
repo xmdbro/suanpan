@@ -177,16 +177,6 @@ a {
   text-transform: uppercase;
 }
 
-.status-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  margin-right: 8px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 0 4px rgba(64, 160, 43, 0.1);
-}
-
 .hero h1,
 .docs-hero h1 {
   max-width: 720px;
@@ -206,7 +196,6 @@ a {
 }
 
 .hero-actions,
-.callout-actions,
 .docs-actions {
   display: flex;
   align-items: center;
@@ -346,11 +335,19 @@ input:focus-visible {
   font-weight: 700;
 }
 
-.live-indicator span {
+.live-indicator span:first-child {
   width: 7px;
   height: 7px;
   border-radius: 50%;
+  background: var(--muted);
+}
+
+.live-indicator.is-online span:first-child {
   background: var(--green);
+}
+
+.live-indicator.is-offline span:first-child {
+  background: var(--red);
 }
 
 .operation-switch {
@@ -582,7 +579,6 @@ input:focus-visible {
 }
 
 .section-heading h2,
-.docs-callout h2,
 .docs-section h2 {
   margin: 0;
   font-size: clamp(2.35rem, 5vw, 4.5rem);
@@ -590,8 +586,7 @@ input:focus-visible {
   line-height: 1;
 }
 
-.section-heading > p:last-child,
-.docs-callout > div > p:last-child {
+.section-heading > p:last-child {
   margin: 0;
   color: var(--subtext);
   font-size: 18px;
@@ -636,8 +631,7 @@ input:focus-visible {
   font-size: 16px;
 }
 
-.steps code,
-.route-list code {
+.steps code {
   font-family: var(--font-mono);
   font-size: 14px;
 }
@@ -647,56 +641,6 @@ input:focus-visible {
   margin-top: 20px;
   color: var(--blue);
   overflow-wrap: anywhere;
-}
-
-.docs-callout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.72fr);
-  gap: 40px 72px;
-  margin-bottom: 110px;
-  padding: 52px;
-  border: 1px solid var(--overlay);
-  border-radius: var(--radius);
-  background: var(--mantle);
-}
-
-.docs-callout .eyebrow {
-  margin-bottom: 14px;
-}
-
-.docs-callout h2 {
-  font-size: clamp(2.25rem, 4vw, 3.7rem);
-}
-
-.docs-callout > div > p:last-child {
-  margin-top: 20px;
-}
-
-.route-list {
-  display: grid;
-  align-content: center;
-  gap: 12px;
-}
-
-.route-list code {
-  display: block;
-  padding: 13px 15px;
-  border: 1px solid var(--overlay);
-  border-radius: 8px;
-  background: var(--base);
-  color: var(--subtext);
-  overflow-wrap: anywhere;
-}
-
-.route-list span {
-  margin-right: 9px;
-  color: var(--accent-dark);
-  font-weight: 800;
-}
-
-.callout-actions {
-  grid-column: 1 / -1;
-  margin-top: 0;
 }
 
 .text-link {
@@ -716,26 +660,37 @@ input:focus-visible {
   font-size: 14px;
 }
 
-.footer-inner p {
-  margin: 0;
+.footer-repo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
 }
 
 .footer-brand-mark {
   display: inline-grid;
   width: 23px;
   height: 23px;
-  margin-right: 7px;
   place-items: center;
   border-radius: 5px;
   background: var(--accent);
   color: #ffffff;
-  font-family: Georgia, serif;
+  font-family: Georgia, "Noto Serif CJK SC", serif;
   font-weight: 700;
   line-height: 1;
-  vertical-align: middle;
 }
 
-/* Documentation stub */
+.footer-repo-link:hover {
+  color: var(--accent-dark);
+}
+
+.footer-repo-link:focus-visible {
+  border-radius: 4px;
+  outline: 3px solid rgba(217, 83, 63, 0.24);
+  outline-offset: 4px;
+}
+
+/* Documentation */
 
 .docs-main {
   padding-block: 92px 120px;
@@ -811,7 +766,7 @@ input:focus-visible {
   font-size: 16px;
 }
 
-.docs-card code {
+.docs-card > code {
   display: block;
   margin-top: 18px;
   padding: 14px 16px;
@@ -907,14 +862,9 @@ input:focus-visible {
     max-width: 720px;
   }
 
-  .docs-callout,
   .docs-hero,
   .docs-section {
     grid-template-columns: 1fr;
-  }
-
-  .docs-callout {
-    gap: 34px;
   }
 
   .docs-section,
@@ -1029,11 +979,6 @@ input:focus-visible {
     padding-block: 82px;
   }
 
-  .docs-callout {
-    margin-bottom: 82px;
-    padding: 30px 24px;
-  }
-
   .docs-main {
     padding-block: 64px 88px;
   }
@@ -1047,6 +992,21 @@ input:focus-visible {
     flex-direction: column;
     justify-content: center;
     gap: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-inner {
+    gap: 12px;
+  }
+
+  .brand-name {
+    display: none;
+  }
+
+  .site-nav a {
+    padding-inline: 7px;
+    font-size: 13px;
   }
 }
 

@@ -14,9 +14,12 @@
   const responseJson = document.querySelector("#response-json code");
   const counterValue = document.querySelector("#counter-value");
   const runLabel = document.querySelector("#run-label");
+  const apiStatus = document.querySelector("#api-status");
+  const apiStatusLabel = document.querySelector("#api-status-label");
   const configuredBaseUrl = window.SUANPAN_DOCS?.apiBaseUrl || window.location.origin;
   const apiBaseUrl = configuredBaseUrl.replace(/\/$/, "");
   let operation = "hit";
+  let checkingApi = false;
 
   const randomSuffix = Math.random().toString(36).slice(2, 7);
   namespaceInput.value = `demo-${randomSuffix}`;
@@ -40,6 +43,34 @@
   function setStatus(label, state) {
     responseStatus.textContent = label;
     responseStatus.className = `response-status is-${state}`;
+  }
+
+  function setApiStatus(online) {
+    apiStatus.className = `live-indicator is-${online ? "online" : "offline"}`;
+    apiStatusLabel.textContent = online ? "API live" : "API offline";
+  }
+
+  async function checkApiStatus() {
+    if (checkingApi) return;
+    checkingApi = true;
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 5000);
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/healthcheck`, {
+        cache: "no-store",
+        signal: controller.signal,
+        headers: { Accept: "application/json" },
+      });
+      const health = response.ok ? await response.json() : null;
+      setApiStatus(response.ok && health?.status === "healthy");
+    } catch {
+      setApiStatus(false);
+    } finally {
+      window.clearTimeout(timeout);
+      checkingApi = false;
+    }
   }
 
   function showResponse(payload, statusCode, ok) {
@@ -99,6 +130,7 @@
 
       showResponse(payload, response.status, response.ok);
     } catch (error) {
+      setApiStatus(false);
       counterValue.textContent = "—";
       responseJson.textContent = JSON.stringify(
         { detail: "Could not reach the API from this preview.", error: error.message },
@@ -108,8 +140,16 @@
       setStatus("Offline", "error");
     } finally {
       runButton.disabled = false;
+      void checkApiStatus();
     }
   });
 
   updateRequestPreview();
+  void checkApiStatus();
+  window.setInterval(() => {
+    if (!document.hidden) void checkApiStatus();
+  }, 30000);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) void checkApiStatus();
+  });
 })();

@@ -1,7 +1,7 @@
 # Suanpan documentation site
 
 This directory is a dependency-free static frontend served by the main FastAPI
-application. The homepage is available at `/`, the authored documentation stub
+application. The homepage is available at `/`, the authored documentation page
 at `/docs`, and FastAPI's interactive Swagger documentation at `/docs-swagger`.
 
 The examples use `window.location.origin`, so they automatically target the
