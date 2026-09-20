@@ -1,10 +1,9 @@
 (() => {
-  const namespaceInput = document.querySelector("#namespace-input");
   const keyInput = document.querySelector("#key-input");
   const requestUrl = document.querySelector("#request-url");
   const runButton = document.querySelector("#run-request");
 
-  if (!namespaceInput || !keyInput || !requestUrl || !runButton) {
+  if (!keyInput || !requestUrl || !runButton) {
     return;
   }
 
@@ -18,11 +17,9 @@
   const apiStatusLabel = document.querySelector("#api-status-label");
   const configuredBaseUrl = window.SUANPAN_DOCS?.apiBaseUrl || window.location.origin;
   const apiBaseUrl = configuredBaseUrl.replace(/\/$/, "");
+  const playgroundNamespace = "playground";
   let operation = "hit";
   let checkingApi = false;
-
-  const randomSuffix = Math.random().toString(36).slice(2, 7);
-  namespaceInput.value = `demo-${randomSuffix}`;
 
   function cleanSegment(value, fallback) {
     const cleaned = value.trim().replace(/[^a-zA-Z0-9._-]/g, "-");
@@ -30,9 +27,8 @@
   }
 
   function buildUrl() {
-    const namespace = encodeURIComponent(cleanSegment(namespaceInput.value, "demo"));
     const key = encodeURIComponent(cleanSegment(keyInput.value, "homepage"));
-    return `${apiBaseUrl}/${operation}/${namespace}/${key}`;
+    return `${apiBaseUrl}/${operation}/${playgroundNamespace}/${key}`;
   }
 
   function updateRequestPreview() {
@@ -92,13 +88,11 @@
     });
   });
 
-  [namespaceInput, keyInput].forEach((input) => {
-    input.addEventListener("input", updateRequestPreview);
-    input.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        runButton.click();
-      }
-    });
+  keyInput.addEventListener("input", updateRequestPreview);
+  keyInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      runButton.click();
+    }
   });
 
   copyButton?.addEventListener("click", async () => {
