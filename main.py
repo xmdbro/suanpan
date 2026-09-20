@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 
 from core.database import init_valkey, close_valkey
@@ -26,6 +27,8 @@ app = FastAPI(
     title="Suanpan",
     description="A highly scalable and stateless counting API.",
     lifespan=lifespan,
+    docs_url="/docs-swagger",
+    redoc_url=None,
 )
 
 
@@ -97,6 +100,12 @@ async def stats():
         return {"error": str(e)}
 
 
-# Serve the documentation site as the frontend fallback. FastAPI path
-# operations (including Swagger at /docs) take priority over frontend files.
+@app.get("/docs", include_in_schema=False)
+async def documentation_home():
+    """Serve the authored documentation landing page."""
+    return FileResponse(DOCS_DIR / "docs.html")
+
+
+# Serve the static site as the frontend fallback. API operations, the authored
+# documentation route, and Swagger take priority over frontend files.
 app.frontend("/", directory=DOCS_DIR)
